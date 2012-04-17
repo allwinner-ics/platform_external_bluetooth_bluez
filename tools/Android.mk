@@ -139,6 +139,7 @@ LOCAL_SRC_FILES:= \
 	hciattach_st.c \
 	hciattach_ti.c \
 	hciattach_tialt.c \
+	hciattach_rtk.c \
 
 LOCAL_CFLAGS:= \
 	-DVERSION=\"4.93\" \
@@ -152,6 +153,11 @@ endif
 
 ifeq ($(SW_BOARD_HAVE_BLUETOOTH_NAME), bcm40183)
 LOCAL_CFLAGS+=-DBCM_BT_BCM40183
+endif
+
+# realtek rtl8723as combo bt
+ifeq ($(SW_BOARD_HAVE_BLUETOOTH_RTK), true)
+LOCAL_CFLAGS += -DSW_BOARD_HAVE_BLUETOOTH_RTK
 endif
 
 LOCAL_C_INCLUDES:=\

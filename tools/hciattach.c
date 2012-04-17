@@ -1040,19 +1040,39 @@ static int bcm4329(int fd, struct uart_t *u, struct termios *ti)
     return bcm4329_init(fd, u->speed, u->bdaddr, ti);
 }
 
+#if defined(SW_BOARD_HAVE_BLUETOOTH_RTK)
+//above the uart[] initialization add the realtek_h4 function
+static int realtek_h4(int fd, struct uart_t *u, struct termios *ti)
+{
+	return rtk_init_h4(fd, u->speed, ti);
+}
+
+static int realtek_h5(int fd, struct uart_t *u, struct termios *ti)
+{
+	return rtk_init(fd, u->speed, ti);
+}
+#endif
+
 struct uart_t uart[] = {
+#if defined(SW_BOARD_HAVE_BLUETOOTH_RTK)	
+	{"any", 		0x0000, 0x0000, HCI_UART_H4,   1500000, 1500000, 
+				FLOW_CTL, DISABLE_PM, NULL, realtek_h4 },
+#else
 	{ "any",        0x0000, 0x0000, HCI_UART_H4,   115200, 115200,
 				FLOW_CTL, DISABLE_PM, NULL, NULL     },
-
+#endif
 	{ "ericsson",   0x0000, 0x0000, HCI_UART_H4,   57600,  115200,
 				FLOW_CTL, DISABLE_PM, NULL, ericsson },
 
 	{ "digi",       0x0000, 0x0000, HCI_UART_H4,   9600,   115200,
 				FLOW_CTL, DISABLE_PM, NULL, digi     },
-
+#if defined(SW_BOARD_HAVE_BLUETOOTH_RTK)
+	{ "bcsp",       0x0000, 0x0000, HCI_UART_BCSP, 115200, 115200,
+				FLOW_CTL, DISABLE_PM, NULL, realtek_h5  },
+#else
 	{ "bcsp",       0x0000, 0x0000, HCI_UART_BCSP, 115200, 115200,
 				0, DISABLE_PM, NULL, bcsp     },
-
+#endif
 	/* Xircom PCMCIA cards: Credit Card Adapter and Real Port Adapter */
 	{ "xircom",     0x0105, 0x080a, HCI_UART_H4,   115200, 115200,
 				FLOW_CTL, DISABLE_PM,  NULL, NULL     },
@@ -1169,7 +1189,7 @@ static struct uart_t * get_by_type(char *type)
 	}
 	return NULL;
 }
-
+#if 0
 /*
  * winner's application
  * if start hciattach without a valid mac address
@@ -1210,21 +1230,22 @@ static int load_bt_firmware(char *dev, struct uart_t *u)
     }
     return 0;
 }
-
+#endif
 /* Initialize UART driver */
 static int init_uart(char *dev, struct uart_t *u, int send_break, int raw)
 {
 	struct termios ti;
 	int fd, i;
 	unsigned long flags = 0;
-	
+
+#if 0	
     /* check mac addr, if not set, read from file or generate it*/
     check_set_btaddr(u);
     
     /* load firmware into bt module */
     load_bt_firmware(dev, u);
     usleep(200000);
-
+#endif
 	if (raw)
 		flags |= 1 << HCI_UART_RAW_DEVICE;
 
